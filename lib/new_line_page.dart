@@ -10,7 +10,11 @@ class NewLinePage extends StatelessWidget {
           Spacer(),
           ListTile(
             title: Center(child: Text("Camera")),
-            onTap: () => Navigator.of(context).pushNamed(CAMERA_PAGE),
+            onTap: () {
+              Navigator.of(context).pushNamed(CAMERA_PAGE).then((path) {
+                print(path);
+              });
+            },
           )
         ],
       ),
