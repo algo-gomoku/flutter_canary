@@ -40,7 +40,11 @@ class _CameraPageState extends State<CameraPage> {
     return AspectRatio(
         aspectRatio: controller.value.aspectRatio,
         child: Stack(
-          children: <Widget>[CameraPreview(controller), buildCaptureButton()],
+          children: <Widget>[
+            CameraPreview(controller),
+            buildCaptureButton(),
+            Mask()
+          ],
         ));
   }
 
@@ -95,7 +99,11 @@ class _CameraPageState extends State<CameraPage> {
                   },
                   child: Container(
                     padding: EdgeInsets.all(4.0),
-                    child: Icon(Icons.flip, size: 42.0, color: Colors.blue,),
+                    child: Icon(
+                      Icons.flip,
+                      size: 42.0,
+                      color: Colors.blue,
+                    ),
                   ),
                 ),
               ),
@@ -150,7 +158,7 @@ class _CameraPageState extends State<CameraPage> {
       return null;
     }
     final Directory extDir = await getApplicationDocumentsDirectory();
-    final String dirPath = '${extDir.path}/FlutterCanary/';
+    final String dirPath = '${extDir.path}/FlutterCanary';
     await new Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.jpg';
 
@@ -180,11 +188,56 @@ class _CameraPageState extends State<CameraPage> {
   void logError(String code, String message) =>
       print('Error: $code\nMessage: $message');
 
-  String timestamp() {
-    return "test";
-  }
+  String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
 
   Future<Directory> getApplicationDocumentsDirectory() async {
-    return Directory("/sdcard/");
+    return Directory("/sdcard");
+  }
+}
+
+class Mask extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return MaskState();
+  }
+}
+
+class MaskState extends State<Mask> {
+  var opacity = 0.5;
+  var path = null;
+
+  @override
+  void initState() {
+    super.initState();
+    getMaskFile().then((f) {
+      setState(() {
+        path = f;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return path == null
+        ? Text("")
+        : GestureDetector(
+            child: Center(
+                child: Opacity(
+              opacity: opacity,
+              child: Image.file(path, scale: 0.5),
+            )),
+            onVerticalDragUpdate: (detail) {
+              print(detail);
+              opacity += detail.delta.dy / 30;
+              if (opacity > 1.0) opacity = 1.0;
+              if (opacity < 0) opacity = 0;
+              setState(() {});
+            });
+  }
+
+  Future<File> getMaskFile() async {
+    var dir = Directory("/sdcard/FlutterCanary");
+    var file = await dir.list().first;
+    return File(file.path);
   }
 }
