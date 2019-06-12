@@ -40,7 +40,7 @@ class _CameraPageState extends State<CameraPage> {
     print(controller.value.aspectRatio);
     return Stack(
       children: <Widget>[
-        Center(child: AspectRatio(aspectRatio: controller.value.aspectRatio,child: CameraPreview(controller))),
+        AspectRatio(aspectRatio: controller.value.aspectRatio,child: CameraPreview(controller)),
         buildCaptureButton(),
         Mask()
       ],
@@ -220,16 +220,15 @@ class MaskState extends State<Mask> {
     return path == null
         ? Text("")
         : GestureDetector(
-            child: Center(
-                child: Opacity(
+            child: Opacity(
               opacity: opacity,
               child: Image.file(path, scale: 0.5),
-            )),
+            ),
             onVerticalDragUpdate: (detail) {
               print(detail);
-              opacity += detail.delta.dy / 30;
-              if (opacity > 1.0) opacity = 1.0;
-              if (opacity < 0) opacity = 0;
+              opacity += detail.delta.dy / 90;
+              if (opacity > 0.9) opacity = 0.9;
+              if (opacity < 0.1) opacity = 0.1;
               setState(() {});
             });
   }
