@@ -37,15 +37,14 @@ class _CameraPageState extends State<CameraPage> {
     if (!controller.value.isInitialized) {
       return Container();
     }
-    return AspectRatio(
-        aspectRatio: controller.value.aspectRatio,
-        child: Stack(
-          children: <Widget>[
-            CameraPreview(controller),
-            buildCaptureButton(),
-            Mask()
-          ],
-        ));
+    print(controller.value.aspectRatio);
+    return Stack(
+      children: <Widget>[
+        Center(child: AspectRatio(aspectRatio: controller.value.aspectRatio,child: CameraPreview(controller))),
+        buildCaptureButton(),
+        Mask()
+      ],
+    );
   }
 
   Widget buildCaptureButton() {
@@ -237,7 +236,10 @@ class MaskState extends State<Mask> {
 
   Future<File> getMaskFile() async {
     var dir = Directory("/sdcard/FlutterCanary");
-    var file = await dir.list().first;
-    return File(file.path);
+    var files = await dir.list().toList();
+    files.sort((a, b) {
+      return a.statSync().changed.compareTo(b.statSync().changed);
+    });
+    return File(files.last.path);
   }
 }
