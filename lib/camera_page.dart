@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+const MethodChannel _channel =
+    MethodChannel('plugins.flutter.io/path_provider');
 
 class CameraPage extends StatefulWidget {
   var cameras;
@@ -190,8 +194,18 @@ class _CameraPageState extends State<CameraPage> {
   String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
 
   Future<Directory> getApplicationDocumentsDirectory() async {
-    return Directory("/sdcard");
+    if (Platform.isIOS) {
+      final String path =
+          await _channel.invokeMethod<String>('getApplicationDocumentsDirectory');
+      if (path == null) {
+        return null;
+      }
+      return Directory(path);
+    } else {
+      return Directory("/sdcard");
+    }
   }
+
 }
 
 class Mask extends StatefulWidget {
@@ -233,8 +247,22 @@ class MaskState extends State<Mask> {
             });
   }
 
+  Future<Directory> getApplicationDocumentsDirectory() async {
+    if (Platform.isIOS) {
+      final String path =
+          await _channel.invokeMethod<String>('getApplicationDocumentsDirectory');
+      if (path == null) {
+        return null;
+      }
+      return Directory(path);
+    } else {
+      return Directory("/sdcard");
+    }
+  }
+
   Future<File> getMaskFile() async {
-    var dir = Directory("/sdcard/FlutterCanary");
+    final Directory extDir = await getApplicationDocumentsDirectory();
+    Directory dir = Directory(extDir.path + "/FlutterCanary");
     var files = await dir.list().toList();
     files.sort((a, b) {
       return a.statSync().changed.compareTo(b.statSync().changed);
